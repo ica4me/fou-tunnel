@@ -4,6 +4,10 @@ sh get-docker.sh
 apt-get install iperf3 -y
 ========================================
 
+git clone https://github.com/ica4me/fou-tunnel.git
+cd fou-tunnel
+
+
 sudo sysctl -w net.ipv4.ip_forward=1
 sudo sysctl -w net.ipv4.conf.eth2.rp_filter=0
 
