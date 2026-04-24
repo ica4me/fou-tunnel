@@ -1,0 +1,55 @@
+# ══════════════════════════════════════════════
+#  FOU TUNNEL — SERVER
+#
+#  Host   : Ubuntu 22.04
+#  eth2   : 202.10.48.182  ← IP publik langsung
+#  Tunnel : tun0  10.10.10.1/30
+#
+#  Menerima dari client:
+#    public  38.47.95.247
+#    FOU UDP 5555
+# ══════════════════════════════════════════════
+
+services:
+  fou-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: fou-server:alpine
+    container_name: fou-server
+    privileged: true
+
+    # ── Host network namespace ────────────────
+    # WAJIB: agar tun0 muncul langsung di host
+    # dan bisa bind ke 202.10.48.182
+    network_mode: host
+
+    # ── Capabilities ─────────────────────────
+    cap_add:
+      - NET_ADMIN      # ip link, ip route, iptables
+      - NET_RAW        # raw socket (IPIP/GRE)
+      - SYS_MODULE     # modprobe fou, ipip
+
+    # ── Sysctl diset di entrypoint.sh via sysctl -w
+    # (tidak bisa di sini karena network_mode: host)
+
+    # ── Mount kernel modules dari host ────────
+    volumes:
+      - /lib/modules:/lib/modules:ro
+
+    env_file:
+      - .env
+
+    restart: unless-stopped
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    labels:
+      - "foutunnel.role=server"
+      - "foutunnel.server_ip=202.10.48.182"
+      - "foutunnel.client_ip=38.47.95.247"
+      - "foutunnel.port=5555"

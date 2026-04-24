@@ -1,0 +1,30 @@
+curl -fsSL https://get.docker.com -o get-docker.sh
+sh get-docker.sh
+
+apt-get install iperf3 -y
+========================================
+
+sudo sysctl -w net.ipv4.ip_forward=1
+sudo sysctl -w net.ipv4.conf.eth2.rp_filter=0
+
+----
+
+docker compose down
+docker compose up -d --build
+
+========================================
+
+
+Test Speed
+
+# server
+iperf3 -s
+
+# client Upload
+iperf3 -c 10.10.10.1
+
+# client Download
+iperf3 -c 10.10.10.1 -R
+
+# Tets upload 100MB
+iperf3 -c 10.10.10.1 -u -b 100M
