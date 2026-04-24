@@ -9,7 +9,7 @@
 #  172.16.3.200 → NAT(38.47.95.247) → 202.10.48.182
 # ══════════════════════════════════════════════
 
-PEER="${TUNNEL_SERVER_PEER:-10.10.10.1}"
+PEER="${TUNNEL_SERVER_PEER:-10.11.12.1}"
 INTERVAL="${KEEPALIVE_INTERVAL:-20}"
 IF="${TUNNEL_IF:-tun0}"
 

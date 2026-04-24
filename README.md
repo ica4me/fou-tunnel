@@ -1,4 +1,5 @@
 # FOU Tunnel over Docker — Alpine
+
 ### Foo-over-UDP | Server ↔ Client (behind CGNAT/NAT)
 
 ---
@@ -14,7 +15,7 @@
 │  ┌─────────────────────┐                                    │
 │  │   fou-client        │  bind local: 172.16.3.200          │
 │  │   Alpine            │  encap-sport: 5555 (fixed)         │
-│  │   tun0: 10.10.10.2  │  encap-dport: 5555                 │
+│  │   tun0: 10.11.12.2  │  encap-dport: 5555                 │
 │  └─────────────────────┘                                    │
 └─────────────────┬───────────────────────────────────────────┘
                   │  UDP:5555  (IPIP-in-UDP / FOU)
@@ -28,22 +29,22 @@
 │  ┌─────────────────────┐                                    │
 │  │   fou-server        │  FOU listener UDP:5555             │
 │  │   Alpine            │  local:  202.10.48.182             │
-│  │   tun0: 10.10.10.1  │  remote: 38.47.95.247              │
+│  │   tun0: 10.11.12.1  │  remote: 38.47.95.247              │
 │  └─────────────────────┘                                    │
 └─────────────────────────────────────────────────────────────┘
 
 Tunnel virtual:
-  Server  10.10.10.1/30
-  Client  10.10.10.2/30
+  Server  10.11.12.1/30
+  Client  10.11.12.2/30
 ```
 
 ---
 
 ## Kenapa `local` Client = 172.16.3.200 bukan 38.47.95.247?
 
-| IP | Keterangan |
-|---|---|
-| `172.16.3.200` | IP nyata di interface eth2 — bisa di-bind |
+| IP             | Keterangan                                             |
+| -------------- | ------------------------------------------------------ |
+| `172.16.3.200` | IP nyata di interface eth2 — bisa di-bind              |
 | `38.47.95.247` | IP publik hasil NAT/CGNAT — **tidak ada di interface** |
 
 Client hanya bisa bind ke IP yang ada di interface-nya sendiri.  
@@ -110,11 +111,11 @@ docker exec fou-server ip addr show tun0
 docker exec fou-server ip fou show
 
 # Ping ke client peer
-docker exec fou-server ping -c4 10.10.10.2
+docker exec fou-server ping -c4 10.11.12.2
 
 # ── Di client ──────────────────────────────
 # Ping ke server peer
-docker exec fou-client ping -c4 10.10.10.1
+docker exec fou-client ping -c4 10.11.12.1
 
 # Cek keepalive berjalan
 docker exec fou-client ps aux | grep keepalive
@@ -130,26 +131,26 @@ docker inspect --format='{{.State.Health.Status}}' fou-client
 
 ### Server `.env`
 
-| Variable | Nilai | Keterangan |
-|---|---|---|
-| `SERVER_IFACE` | `eth2` | Interface publik server |
-| `SERVER_IP` | `202.10.48.182` | IP publik server |
-| `CLIENT_PUBLIC_IP` | `38.47.95.247` | IP publik client (post-NAT) |
-| `FOU_PORT` | `5555` | UDP port FOU |
-| `TUNNEL_SERVER_ADDR` | `10.10.10.1/30` | IP virtual server |
-| `ENABLE_MASQUERADE` | `false` | NAT untuk routing internet |
+| Variable             | Nilai           | Keterangan                  |
+| -------------------- | --------------- | --------------------------- |
+| `SERVER_IFACE`       | `eth2`          | Interface publik server     |
+| `SERVER_IP`          | `202.10.48.182` | IP publik server            |
+| `CLIENT_PUBLIC_IP`   | `38.47.95.247`  | IP publik client (post-NAT) |
+| `FOU_PORT`           | `5555`          | UDP port FOU                |
+| `TUNNEL_SERVER_ADDR` | `10.11.12.1/30` | IP virtual server           |
+| `ENABLE_MASQUERADE`  | `false`         | NAT untuk routing internet  |
 
 ### Client `.env`
 
-| Variable | Nilai | Keterangan |
-|---|---|---|
-| `CLIENT_IFACE` | `eth2` | Interface lokal client |
-| `CLIENT_LOCAL_IP` | `172.16.3.200` | IP lokal (di-bind) |
-| `CLIENT_PUBLIC_IP` | `38.47.95.247` | Info saja, tidak di-bind |
-| `SERVER_IP` | `202.10.48.182` | Tujuan tunnel |
-| `FOU_PORT` | `5555` | UDP port FOU |
-| `TUNNEL_CLIENT_ADDR` | `10.10.10.2/30` | IP virtual client |
-| `KEEPALIVE_INTERVAL` | `20` | Detik antar ping (< 30!) |
+| Variable             | Nilai           | Keterangan               |
+| -------------------- | --------------- | ------------------------ |
+| `CLIENT_IFACE`       | `eth2`          | Interface lokal client   |
+| `CLIENT_LOCAL_IP`    | `172.16.3.200`  | IP lokal (di-bind)       |
+| `CLIENT_PUBLIC_IP`   | `38.47.95.247`  | Info saja, tidak di-bind |
+| `SERVER_IP`          | `202.10.48.182` | Tujuan tunnel            |
+| `FOU_PORT`           | `5555`          | UDP port FOU             |
+| `TUNNEL_CLIENT_ADDR` | `10.11.12.2/30` | IP virtual client        |
+| `KEEPALIVE_INTERVAL` | `20`            | Detik antar ping (< 30!) |
 
 ---
 
@@ -184,6 +185,7 @@ ENABLE_MASQUERADE=true
 ## Troubleshooting
 
 **Module tidak ter-load:**
+
 ```bash
 lsmod | grep -E "^fou|^ipip"
 # Jika kosong:
@@ -191,6 +193,7 @@ sudo modprobe fou && sudo modprobe ipip
 ```
 
 **Tunnel UP tapi ping gagal:**
+
 ```bash
 # Cek rp_filter di host server
 sysctl net.ipv4.conf.eth2.rp_filter
@@ -199,6 +202,7 @@ sudo sysctl -w net.ipv4.conf.eth2.rp_filter=0
 ```
 
 **CGNAT drop koneksi terus:**
+
 ```bash
 # Turunkan KEEPALIVE_INTERVAL ke 15 di client .env
 # Lalu restart:
@@ -206,6 +210,7 @@ docker compose restart fou-client
 ```
 
 **Lihat paket UDP masuk di server:**
+
 ```bash
 sudo tcpdump -i eth2 udp port 5555 -n
 # Harusnya terlihat traffic dari 38.47.95.247

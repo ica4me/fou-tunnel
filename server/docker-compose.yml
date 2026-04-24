@@ -3,7 +3,7 @@
 #
 #  Host   : Ubuntu 22.04
 #  eth2   : 202.10.48.182  ← IP publik langsung
-#  Tunnel : tun0  10.10.10.1/30
+#  Tunnel : tun0  10.11.12.1/30
 #
 #  Menerima dari client:
 #    public  38.47.95.247
@@ -26,9 +26,9 @@ services:
 
     # ── Capabilities ─────────────────────────
     cap_add:
-      - NET_ADMIN      # ip link, ip route, iptables
-      - NET_RAW        # raw socket (IPIP/GRE)
-      - SYS_MODULE     # modprobe fou, ipip
+      - NET_ADMIN # ip link, ip route, iptables
+      - NET_RAW # raw socket (IPIP/GRE)
+      - SYS_MODULE # modprobe fou, ipip
 
     # ── Sysctl diset di entrypoint.sh via sysctl -w
     # (tidak bisa di sini karena network_mode: host)

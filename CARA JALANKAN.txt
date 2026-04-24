@@ -25,10 +25,10 @@ Test Speed
 iperf3 -s
 
 # client Upload
-iperf3 -c 10.10.10.1
+iperf3 -c 10.11.12.1
 
 # client Download
-iperf3 -c 10.10.10.1 -R
+iperf3 -c 10.11.12.1 -R
 
 # Tets upload 100MB
-iperf3 -c 10.10.10.1 -u -b 100M
+iperf3 -c 10.11.12.1 -u -b 100M

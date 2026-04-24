@@ -1,6 +1,6 @@
 #!/bin/bash
 IF="${TUNNEL_IF:-tun0}"
-PEER="${TUNNEL_SERVER_PEER:-10.10.10.1}"
+PEER="${TUNNEL_SERVER_PEER:-10.11.12.1}"
 
 # Cek interface UP
 ip link show "$IF" 2>/dev/null | grep -E -q "state (UP|UNKNOWN)" || {

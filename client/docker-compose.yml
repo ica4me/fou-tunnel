@@ -4,7 +4,7 @@
 #  Host   : Ubuntu 22.04 (behind NAT/CGNAT)
 #  eth2   : 172.16.3.200  ← IP lokal (bind)
 #  Publik : 38.47.95.247  ← IP NAT keluar
-#  Tunnel : tun0  10.10.10.2/30
+#  Tunnel : tun0  10.11.12.2/30
 #
 #  Server : 202.10.48.182:5555
 # ══════════════════════════════════════════════
@@ -25,9 +25,9 @@ services:
 
     # ── Capabilities ──────────────────────────
     cap_add:
-      - NET_ADMIN      # ip link, ip route, iptables
-      - NET_RAW        # raw socket (IPIP/GRE)
-      - SYS_MODULE     # modprobe
+      - NET_ADMIN # ip link, ip route, iptables
+      - NET_RAW # raw socket (IPIP/GRE)
+      - SYS_MODULE # modprobe
 
     # ── Sysctl diset di entrypoint.sh via sysctl -w
     # (tidak bisa di sini karena network_mode: host)
